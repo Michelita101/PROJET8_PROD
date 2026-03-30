@@ -17,6 +17,8 @@ import io
 import base64
 from pathlib import Path
 
+import urllib.request
+
 from PIL import Image
 import tensorflow as tf
 import keras
@@ -29,6 +31,7 @@ from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from api.utils.inference import predict_mask, colorize_mask
 from api.utils.data_loader import (list_available_ids, get_image_path, get_real_mask_path)
 
+MODEL_URL = "https://github.com/Michelita101/PROJET8_PROD/releases/download/v1-model/deeplabv3plus_model.keras"
 
 # Fonction nécessaire à la désérialisation du modèle (Lambda ASPP)
 @register_keras_serializable()
@@ -40,16 +43,27 @@ keras.config.enable_unsafe_deserialization()
 
 # Chargement du modèle
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "models" / "deeplabv3plus_model.keras"
+
+LOCAL_MODEL_PATH = BASE_DIR / "models" / "deeplabv3plus_model.keras"
+TMP_MODEL_DIR = Path("/tmp/models")
+TMP_MODEL_DIR.mkdir(parents=True, exist_ok=True)
+TMP_MODEL_PATH = TMP_MODEL_DIR / "deeplabv3plus_model.keras"
+
+if LOCAL_MODEL_PATH.exists():
+    print(f"Chargement du modèle local : {LOCAL_MODEL_PATH}")
+    MODEL_PATH = LOCAL_MODEL_PATH
+
+else:
+    if not TMP_MODEL_PATH.exists():
+        print(f"Téléchargement du modèle depuis : {MODEL_URL}")
+        urllib.request.urlretrieve(MODEL_URL, TMP_MODEL_PATH)
+        print("Téléchargement terminé.")
+    
+    MODEL_PATH = TMP_MODEL_PATH
+
 print(f"Chargement du modèle depuis : {MODEL_PATH}")
 model = load_model(MODEL_PATH, compile=False)
 print("Modèle chargé avec succès ;-)")
-
-app = FastAPI(
-    title="DeepLabV3+ Segmentation API",
-    description="API de segmentation sémantique (projet voiture autonome - OC)",
-    version="1.0.0"
-)
 
 # HEALTH CHECK
 @app.get("/health")
