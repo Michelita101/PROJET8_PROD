@@ -68,6 +68,24 @@ PROJET8_PROD
 
 ---
 
+## 🌐 Cloud deployment
+
+The application is fully deployed in the cloud using Render.
+
+### 🔹 API (FastAPI)
+👉 Swagger documentation available at:  
+https://projet8-api.onrender.com/docs
+
+### 🔹 Streamlit application
+👉 Web interface available at:  
+https://projet8-streamlit.onrender.com
+
+### ⚠️ Important (demo preparation)
+Render services may go idle after inactivity.  
+For a smooth demonstration, open both URLs a few minutes before use to warm up the services.
+
+---
+
 ## 🔌 API description (FastAPI)
 
 The API exposes the following endpoints:
@@ -78,8 +96,6 @@ The API exposes the following endpoints:
 | GET | `/image/{image_id}` | Retrieve a real image |
 | GET | `/mask-real/{image_id}` | Retrieve the ground truth mask |
 | GET | `/predict/{image_id}` | Retrieve the predicted segmentation mask |
-
-The API is documented automatically via Swagger at: http://127.0.0.1:8000/docs
 
 ---
 
@@ -93,8 +109,6 @@ The Streamlit application allows users to:
    - the ground truth mask,
    - the predicted mask.
 
-The frontend communicates exclusively with the API, ensuring a clean separation of concerns.
-
 ---
 
 ## 🚀 How to run the project locally
@@ -103,17 +117,14 @@ The frontend communicates exclusively with the API, ensuring a clean separation 
 
 ```bash
 cd PROJET8_PROD
-source api/venv/bin/activate
 uvicorn api.main:app --reload
 ```
-
 API available at : http://127.0.0.1:8000
 
 ### 2️⃣  Launch  the Streamlit application
 
 ```bash
 cd PROJET8_PROD
-source api/venv/bin/activate
 streamlit run streamlit_app/app.py
 ```
 
@@ -123,19 +134,22 @@ Application available at : http://localhost:8501
 
 ## 🔒 Design choices
 
-- A limited number of images is embedded directly in the application to allow free deployment solutions.
-- Image and mask filenames are standardized using a unique identifier.
-- All file access is handled by the API, never directly by the frontend.
-- The project is designed to be easily dockerized and deployed.
+- Separation between API (inference) and frontend (visualization).
+- Dynamic loading of the model from an external source (GitHub Release).
+- Dual data loading strategy:
+	•	local dataset for development,
+	•	cloud fallback for deployment.
+- Environment variable configuration (API_URL) for seamless local/cloud switching.
+- Lightweight dataset (6 images) to enable cloud deployment without heavy storage constraints.
 
 ---
 
-## 📦 Next steps
+## 📦 Deployment strategy
 
-- Dockerization of the API and Streamlit app
-- Version control with Git and GitHub
-- Cloud deployment
-- Performance and UX refinements
+- Docker-based deployment for reproducibility.
+- API and frontend deployed as **independent services**.
+- Cloud infrastructure handled via Render.
+- Model and demo data loaded dynamically at runtime.
 
 ---
 
