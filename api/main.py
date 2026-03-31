@@ -65,6 +65,12 @@ print(f"Chargement du modèle depuis : {MODEL_PATH}")
 model = load_model(MODEL_PATH, compile=False)
 print("Modèle chargé avec succès ;-)")
 
+app = FastAPI(
+    title="DeepLabV3+ Segmentation API",
+    description="API de segmentation sémantique (projet voiture autonome - OC)",
+    version="1.0.0"
+)
+
 # HEALTH CHECK
 @app.get("/health")
 def health():
